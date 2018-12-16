@@ -5,7 +5,7 @@
  */
 
 const doSearch = (searchTerms) => {
-    return 'list of matches';
+    return { searchTerms };
 };
 
 const searching = (() => {

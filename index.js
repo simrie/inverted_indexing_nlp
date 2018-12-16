@@ -1,20 +1,23 @@
+"use strict";
+
+/*
+    Express node.js app runs backend indexing operations,
+    which upon startup opens a default browser to load
+    an angular.js and bootstrap user interface.
+ */
+
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const server = require('http').createServer(app);
-const io = require('socket.io')(server);
 const opn = require('opn');
-//const got = require('got');
-//const natural = require('natural');
-const _ = require('lodash');
-//const create = require('./fakerObjects/dataFakerCreator.js');
-
-
-
-const port = 3001;
-const url = 'http://localhost:' + port;
+const clear = require('./operations/clear');
+const indexing = require('./operations/indexing');
+const searching = require('./operations/searching');
 
 // Express app setup
+const port = 3001;
+const url = 'http://localhost:' + port;
 app.use(express.static(__dirname + '/node_modules'));
 app.use(express.static(__dirname + '/displayPage'));
 app.use(express.static(__dirname + '/operations'));
@@ -28,28 +31,22 @@ app.get('/', function(req, res) {
 
 app.get('/clear', function(req, res) {
     console.log('clear req ', req);
-    res.send('cleared');
+    res.send(clear.doClear());
 });
 
 app.post('/index', function(req, res) {
-    console.log('index req ', req.body.urlIP);
-    const obj = {};
-    obj['request'] = 'indexed';
-    res.json(obj);
-});
-
-app.post('/search', function(req, res) {
-    console.log('search req ', req.body.words);
-    const obj = {};
-    obj['request'] = 'searched';
-    res.json(obj);
+    res.json(indexing.doIndex(req.body.urlIP));
     res.end();
 });
 
-// Tell the server what port to run on
+app.post('/search', function(req, res) {
+    res.json(indexing.doIndex(req.body.words));
+    res.end();
+});
+
 server.listen(port);
 
-// Open the display page in a browser
+// Open the display page in a browser on startup
 try {
     opn(url);
 } catch (e) {

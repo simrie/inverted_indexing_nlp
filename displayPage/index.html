@@ -4,11 +4,6 @@
     <script src="angular/angular.min.js"></script>
     <script src="bootstrap/dist/js/bootstrap.js"></script>
     <script src="jquery/dist/jquery.js"></script>
-    <script src="socket.io/socket.io.js"></script>
-    <script src="lodash/lodash.min.js"></script>
-    <script src="got/index.js"></script>
-    <script src="natural/lib/natural/tokenizers/aggressive_tokenizer.js"></script>
-    <script src="natural/lib/natural/util/stopwords.js"></script>
     <link rel="stylesheet" type="text/css" href="/css/styles.css">
     <link rel="stylesheet" type="text/css" href="/bootstrap/dist/css/bootstrap.css">
 </head>
@@ -64,6 +59,7 @@
                 </button>
             </div>
         </div>
+        <!--
         <div class="row">
             <div class="col-sm-12">
                 <button type="button"
@@ -74,6 +70,7 @@
                 </button>
             </div>
         </div>
+        -->
         <div class="row">
             <div class="col-sm-12">
                 <div>
@@ -84,34 +81,14 @@
     </div> <!-- container -->
 </div> <!-- app -->
 
-<script src="searching.js"></script>
-<script src="indexing.js"></script>
-<script src="clear.js"></script>
+<!--
 <script src="angtest.js"></script>
+-->
+
 <script src="angularCtrl.js"></script>
 <script>
     var app = angular.module("myApp", []);
     app.controller("myCtrl", angularCtrl);
 </script>
-<!--
-<script>
-    var app = angular.module("myApp", []);
-    app.controller("myCtrl", function($scope) {
-        $scope.results = angtest.nimportQuoi();
-        $scope.clear = function() {
-            $scope.results = clear.doClear();
-        };
-        $scope.index = function() {
-            $scope.results = indexing.doIndex($scope.input);
-        };
-        $scope.search = function() {
-            $scope.results = searching.doSearch($scope.input);
-        };
-        $scope.myFunc = function() {
-            $scope.results = angtest.autrechose($scope.input);
-        };
-    });
-</script>
--->
 </body>
 </html>
