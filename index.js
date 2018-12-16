@@ -24,13 +24,11 @@ app.use(express.static(__dirname + '/operations'));
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
-
 app.get('/', function(req, res) {
     res.sendFile(__dirname + '/displayPage/index.html');
 });
 
 app.get('/clear', function(req, res) {
-    console.log('clear req ', req);
     res.send(clear.doClear());
 });
 
