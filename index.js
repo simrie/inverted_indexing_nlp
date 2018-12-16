@@ -20,7 +20,7 @@ const port = 3001;
 const url = 'http://localhost:' + port;
 app.use(express.static(__dirname + '/node_modules'));
 app.use(express.static(__dirname + '/displayPage'));
-app.use(express.static(__dirname + '/operations'));
+app.use(express.static(__dirname + '/app'));
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
@@ -33,12 +33,18 @@ app.get('/clear', function(req, res) {
 });
 
 app.post('/index', function(req, res) {
-    res.json(indexing.doIndex(req.body.urlIP));
-    res.end();
+    const text = indexing.doIndex(req.body.urlIP);
+    text.then(result => {
+        res.json(result);
+        res.end();
+    }).catch(err => {
+        res.json(err);
+        res.end();
+    });
 });
 
 app.post('/search', function(req, res) {
-    res.json(indexing.doIndex(req.body.words));
+    res.json(searching.doSearch(req.body.words));
     res.end();
 });
 

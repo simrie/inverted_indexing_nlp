@@ -4,14 +4,137 @@
     index the words on the web site
  */
 
+const _ = require('lodash');
+const cheerio = require('cheerio');
+const gotten = require('./gotten');
+const nlp = require('./nlp');
+const store = require('./store');
 
-//const got = require('got');
+const indexVectors = (crawl) => {
+    const entry = crawl.entry;
+    const indexEntries = store.indexEntries;
+    const indexedEntries = _.keys(indexEntries);
+    if (!_.includes(indexedEntries, entry)) {
+        indexEntries[entry] = crawl.title;
+    }
+    console.log('\nIndexVectors: indexEntries  ', _.keys(indexEntries).length);
+    return crawl;
+}
 
-const doIndex = (entry) => {
-    //return async () => await got(entry)();
-    console.log('entry is ', entry);
-    return { entry };
-};
+const reverseIndex = (crawl) => {
+    const stems = crawl.stems;
+    const entry = crawl.entry;
+    const indexStems = store.indexStems;
+    _.forEach(stems, stem => {
+        let entries;
+        if (indexStems[stem]) {
+            entries = indexStems[stem];
+        } else {
+            entries = [];
+        }
+        entries.push(entry);
+        indexStems[stem] = entries;
+    });
+    _.unset(crawl, 'stems');
+    console.log('\nReverseIndex: indexStems ', _.keys(indexStems).length);
+    return crawl;
+}
+
+async function crawlHrefs(crawl) {
+    const crawls = [];
+    const indexEntries = store.indexEntries;
+    store.crawlDepth = store.crawlDepth +1;
+    if (store.crawlDepth > store.crawlDepthMax) {
+        return crawls;
+    }
+    const ahrefs = crawl.ahrefs;
+    console.log('crawlDepth ', store.crawlDepth);
+    console.log('crawlHrefs: ', ahrefs.length);
+    const indexedEntries = _.keys(indexEntries);
+    _.forEach(ahrefs, ahref => {
+        if (!_.includes(indexedEntries, ahref)) {
+            crawls[ahref] = doIndex(ahref);
+        }
+    })
+    _.unset(crawl, 'ahrefs');
+    return crawls;
+}
+
+const cheerioCrawl = (text) => {
+    if (!text) return {};
+    const ahrefs = [];
+    const $ = cheerio.load(text);
+    $('a').each( (index, value) => {
+        var link = $(value).attr('href');
+        if (link && link.startsWith('http')) {
+            if (!_.includes(ahrefs, link)) {
+                ahrefs.push(link);
+            }
+        }
+    });
+    const textToTokenize = cheerioTextExtract($('body'));
+    return {
+        ahrefs,
+        textToTokenize
+    };
+}
+
+function cheerioTextExtract(node) {
+    //https://stackoverflow.com/questions/39176526/iterate-over-source-page-with-cheerio-and-performing-logic
+    const $ = cheerio;
+    const tokenizeEligible = ['tag', 'text'];
+    const textToTokenize = [];
+    node.children().each(function(ix, el) {
+        const $el = $(el);
+        const elType = $el[0].type;
+        const t = $(this).text();
+        if (t) {
+            textToTokenize.push(t);
+        }
+        if (_.includes(tokenizeEligible, elType)) {
+            const more = cheerioTextExtract($el);
+            _.forEach(more, t => {
+                textToTokenize.push(t);
+            })
+        }
+    });
+    return textToTokenize;
+}
+
+const cheerioTag = (text, tag) => {
+    if (!text || !tag) return '';
+    const $ = cheerio.load(text);
+    const elem = $(tag);
+    return elem.text();
+}
+
+async function doIndex(entry) {
+    let text;
+    let title;
+    let crawl;
+    let stringArray;
+    try {
+        text = await gotten(entry);
+        title = cheerioTag(text, 'title');
+        crawl = cheerioCrawl(text);
+        crawl.title = title;
+        crawl.entry = entry;
+        stringArray = _.uniq(_.flattenDeep(crawl.textToTokenize));
+        crawl.stems = nlp.getStems(stringArray);
+        //console.log(crawl);
+        console.log(store);
+        _.unset(crawl, 'normalizeInput');
+        _.unset(crawl, 'textToTokenize');
+        crawl = reverseIndex(crawl);
+        crawl = indexVectors(crawl);
+        //crawl.crawls = await crawlHrefs(crawl);
+        //console.log(crawl);
+        return { title, crawl };
+    } catch(err) {
+        console.log(err);
+        return { err };
+    }
+}
 
 const indexing = (() => {
     return {
