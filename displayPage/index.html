@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <script src="angular/angular.min.js"></script>
+    <script src="bootstrap/dist/js/bootstrap.js"></script>
+    <script src="jquery/dist/jquery.js"></script>
+    <script src="socket.io/socket.io.js"></script>
+    <script src="lodash/lodash.min.js"></script>
+    <script src="got/index.js"></script>
+    <script src="natural/lib/natural/tokenizers/aggressive_tokenizer.js"></script>
+    <script src="natural/lib/natural/util/stopwords.js"></script>
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+    <link rel="stylesheet" type="text/css" href="/bootstrap/dist/css/bootstrap.css">
+</head>
+<body>
+<div ng-app="myApp" ng-controller="myCtrl" ng-init="indexMode=True">
+    <div class="container">
+        <h1>Inverted Indexing</h1>
+        <h3>with the Node.js "natural" NLP library</h3>
+        <div class="row">
+            <div class="col-sm-12">
+                <button type="button"
+                        ng-click="indexMode=!indexMode"
+                        class="btn btn-default">
+                    Search Mode
+                </button>
+                |
+                <button type="button"
+                        ng-click="indexMode=!indexMode"
+                        class="btn btn-default">
+                    Index Web Site Mode
+                </button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <input type="text"
+                       class="form-control"
+                       ng-model="input"
+                ></input>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <button type="button"
+                        ng-click="search()"
+                        class="btn btn-primary"
+                        ng-show="!indexMode"
+                >
+                    Search
+                </button>
+                <button type="button"
+                        class="btn btn-primary"
+                        ng-click="index()"
+                        ng-show="indexMode"
+                >
+                    Index
+                </button>
+                <button type="button"
+                        class="btn btn-primary"
+                        ng-click="clear()"
+                >
+                    Clear
+                </button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <button type="button"
+                        class="btn btn-primary"
+                        ng-click="myFunc()"
+                >
+                    My Func
+                </button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div>
+                    {{ results }}
+                </div>
+            </div>
+        </div>
+    </div> <!-- container -->
+</div> <!-- app -->
+
+<script src="searching.js"></script>
+<script src="indexing.js"></script>
+<script src="clear.js"></script>
+<script src="angtest.js"></script>
+<script src="angularCtrl.js"></script>
+<script>
+    var app = angular.module("myApp", []);
+    app.controller("myCtrl", angularCtrl);
+</script>
+<!--
+<script>
+    var app = angular.module("myApp", []);
+    app.controller("myCtrl", function($scope) {
+        $scope.results = angtest.nimportQuoi();
+        $scope.clear = function() {
+            $scope.results = clear.doClear();
+        };
+        $scope.index = function() {
+            $scope.results = indexing.doIndex($scope.input);
+        };
+        $scope.search = function() {
+            $scope.results = searching.doSearch($scope.input);
+        };
+        $scope.myFunc = function() {
+            $scope.results = angtest.autrechose($scope.input);
+        };
+    });
+</script>
+-->
+</body>
+</html>
