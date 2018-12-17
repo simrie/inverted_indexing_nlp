@@ -6,7 +6,7 @@
 const angularCtrl = ($scope, $http) => {
         const success = (response) => {
             console.log('success response', response);
-            $scope.results = response.data;;
+            $scope.results = response.data;
         };
         const err = (err) => {
             console.log('err ', err);
@@ -32,9 +32,6 @@ const angularCtrl = ($scope, $http) => {
                 data: { 'words' : searchParams },
                 headers: {'Content-Type': 'application/json'}
             }).then(success, err);
-        };
-        $scope.myFunc = function() {
-            $scope.results = angtest.autrechose($scope.input);
         };
 };
 

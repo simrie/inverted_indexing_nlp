@@ -13,8 +13,7 @@ const store = require('./store');
 const indexVectors = (crawl) => {
     const entry = crawl.entry;
     const indexEntries = store.indexEntries;
-    const indexedEntries = _.keys(indexEntries);
-    if (!_.includes(indexedEntries, entry)) {
+    if (!_.includes(_.keys(indexEntries), entry)) {
         indexEntries[entry] = crawl.title;
     }
     console.log('\nIndexVectors: indexEntries  ', _.keys(indexEntries).length);
@@ -32,7 +31,9 @@ const reverseIndex = (crawl) => {
         } else {
             entries = [];
         }
-        entries.push(entry);
+        if (!_.includes(entries, entry)) {
+            entries.push(entry);
+        }
         indexStems[stem] = entries;
     });
     _.unset(crawl, 'stems');
@@ -42,6 +43,7 @@ const reverseIndex = (crawl) => {
 
 async function crawlHrefs(crawl) {
     const crawls = [];
+    if (!crawl.ahrefs) return crawls;
     const indexEntries = store.indexEntries;
     store.crawlDepth = store.crawlDepth +1;
     if (store.crawlDepth > store.crawlDepthMax) {
@@ -49,7 +51,7 @@ async function crawlHrefs(crawl) {
     }
     const ahrefs = crawl.ahrefs;
     console.log('crawlDepth ', store.crawlDepth);
-    console.log('crawlHrefs: ', ahrefs.length);
+    console.log('crawl Hrefs ', ahrefs.length);
     const indexedEntries = _.keys(indexEntries);
     _.forEach(ahrefs, ahref => {
         if (!_.includes(indexedEntries, ahref)) {
@@ -109,6 +111,8 @@ const cheerioTag = (text, tag) => {
 }
 
 async function doIndex(entry) {
+    if (!entry) return {};
+    if (!entry.startsWith('http')) return {};
     let text;
     let title;
     let crawl;
@@ -121,15 +125,11 @@ async function doIndex(entry) {
         crawl.entry = entry;
         stringArray = _.uniq(_.flattenDeep(crawl.textToTokenize));
         crawl.stems = nlp.getStems(stringArray);
-        //console.log(crawl);
-        console.log(store);
-        _.unset(crawl, 'normalizeInput');
         _.unset(crawl, 'textToTokenize');
         crawl = reverseIndex(crawl);
         crawl = indexVectors(crawl);
-        //crawl.crawls = await crawlHrefs(crawl);
-        //console.log(crawl);
-        return { title, crawl };
+        crawl.crawls = await crawlHrefs(crawl);
+        return { entry: { entry, crawl, crawls: crawl.crawls.length } };
     } catch(err) {
         console.log(err);
         return { err };

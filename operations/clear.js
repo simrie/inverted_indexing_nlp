@@ -7,7 +7,10 @@
 const store = require('./store');
 
 const doClear = () => {
-    return 'cleared out memory';
+    store.crawlDepth = 0;
+    store.indexEntries = {};
+    store.indexStems = {};
+    return 'Index Cleared';
 };
 
 const clear = (() => {
