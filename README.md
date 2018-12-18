@@ -27,7 +27,9 @@ Repeats are possible because the complete URLs are stored and sometimes include 
 
 ### When the server starts...
 
-The application will start an Express server with Socket.io, and should automatically launch a browser window.
+The Node.js application will start an Express server with Socket.io, and should automatically launch a browser window that contains a page with an Angular.js app and Bootstrap styling.
+
+If it does not open automatically, it should be available at "localhost:3001".
 
 Search relevance has not been implemented at as of this writing.
  
