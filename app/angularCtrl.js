@@ -28,7 +28,7 @@ const angularCtrl = ($scope, $http) => {
              $http.get('/clear').then(success, err);
         };
         $scope.index = function() {
-            $scope.results = 'Indexing....';
+            //$scope.stringResult = 'Indexing....';
             const urlIP = $scope.input;
             $http({
                 url: '/index',

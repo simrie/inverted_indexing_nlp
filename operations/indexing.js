@@ -12,9 +12,10 @@ const store = require('./store');
 
 const indexVectors = (crawl) => {
     const entry = crawl.entry;
+    const title = crawl.title
     const indexEntries = store.indexEntries;
     if (!_.includes(_.keys(indexEntries), entry)) {
-        indexEntries[entry] = crawl.title;
+        indexEntries[entry] = title;
     }
     console.log('\nIndexVectors: indexEntries  ', _.keys(indexEntries).length);
     return crawl;
@@ -140,15 +141,17 @@ async function reduceCrawls(crawls) {
         async function reducer(result, crawl) {
             crawl.then(value => {
                 const crawled = crawlHrefs(value);
-                crawled.then(crawl2 => {
+                const subCrawls = [];
+                subCrawls.push(crawled);
+                return crawled.then(crawl2 => {
                     const ahrefs = _.keys(crawl2);
                     _.forEach(ahrefs, (ahref) => {
                         index(ahref).then(href =>
-                            crawlHrefs(href)
+                            subCrawls.push(crawlHrefs(href))
                         ).catch();
                     });
+                    return subCrawls;
                 });
-                return crawled;
             }).catch([]);
         }, crawls);
 };
@@ -158,13 +161,14 @@ async function doIndex(entry) {
     const rootCrawl = index(entry);
     store.crawlDepth = 0;
     crawls.push(rootCrawl);
-    const done = await reduceCrawls(crawls);
-    return done;
+    return await reduceCrawls(crawls);
 };
 
-async function getStatMessage(unimportant) {
+const getStatMessage = () => {
     const entries = _.keys(store.indexEntries).length;
     const stems = _.keys(store.indexStems).length;
+    console.log('\nstore.indexEntries[0] \n', store.indexEntries[0]);
+    console.log('\nstore.indexStems[0] \n', store.indexStems[0]);
     return `${stems} word stems indexed from ${entries} nested addresses`;
 }
 

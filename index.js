@@ -8,12 +8,14 @@
 
 const express = require('express');
 const app = express();
-const bodyParser = require('body-parser');
 const server = require('http').createServer(app);
+const io = require('socket.io')(server);
+const bodyParser = require('body-parser');
 const opn = require('opn');
 const clear = require('./operations/clear');
 const indexing = require('./operations/indexing');
 const searching = require('./operations/searching');
+const util = require('util');
 
 // Express app setup
 const port = 3001;
@@ -32,25 +34,52 @@ app.get('/clear', function(req, res) {
     res.send(clear.doClear());
 });
 
-app.post('/index', async function(req, res) {
+app.post('/index', function(req, res) {
     //TODO: make this send stat message after indexing
-    try {
-        const done = await indexing.doIndex(req.body.urlIP);
-        const msg = indexing.getStatMessage(done);
-        console.log(msg);
-        msg.then(res.send).catch(res.send);
-    } catch(err) {
-        console.log('err ', err);
-        res.send(err);
+    const url = req.body.urlIP;
+    io.emit('result', 'Indexing...');
+
+    function crawl(url) {
+        const done = indexing.doIndex(url);
+        console.log('done is ', done);
+        return done;
     }
+    const emitResult = (done) => {
+        const msg = indexing.getStatMessage();
+        console.log('done: ', done, msg);
+        io.emit('result', msg);
+    };
+    // setting a likely interval for it to be done
+    setTimeout(emitResult, 8000, 'timeout');
+    // because promise is not working to send the done message
+    const crawls = util.promisify(crawl);
+    crawls(url).then(() => emitResult).catch(console.log);
+
+
 });
 
 app.post('/search', function(req, res) {
+    io.emit('result', '');
     res.json(searching.doSearch(req.body.words));
     res.end();
 });
 
+// socket.io setup
+io.on('connection', function(client) {
+    console.log('Client connected...');
+    client.on('join', function(data) {
+        console.log('join data received ' + data);
+        const welcome = `Please enter a web site to index.`;
+        client.emit('result', welcome);
+    });
+    client.on('disconnect', function(){
+        console.log('disconnected');
+    });
+});
+
+// Tell the server what port to run on
 server.listen(port);
+
 
 // Open the display page in a browser on startup
 try {
