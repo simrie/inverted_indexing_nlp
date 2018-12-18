@@ -21,7 +21,10 @@ const findEntriesByStem = (stringArray) => {
             };
             lookup.push(resultObject);
         })
-        result[stem] = lookup;
+        result[stem] = {
+            stem,
+            lookup
+        };
     });
     return result;
 }

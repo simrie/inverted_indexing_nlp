@@ -14,17 +14,17 @@
 >
     <div class="container">
         <h1>Inverted Indexing</h1>
-        <h3>with the Node.js "natural" NLP library</h3>
+        <h3>with the Node.js "Wink" NLP Library</h3>
         <div class="row">
             <div class="col-sm-12">
                 <button type="button"
-                        ng-click="indexMode=false;inputHint='search words'"
+                        ng-click="indexMode=false;inputHint='search words';input=''"
                         class="btn btn-default">
                     <span ng-class="{ 'highlighted': indexMode == false }">Search Mode</span>
                 </button>
                 |
                 <button type="button"
-                        ng-click="indexMode=true;inputHint='http://'"
+                        ng-click="indexMode=true;inputHint='http://';input=''"
                         class="btn btn-default">
                     <span ng-class="{ 'highlighted': indexMode == true }">Index Web Site Mode</span>
                 </button>
@@ -64,10 +64,23 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-sm-12">
+            <div class="col-sm-12" >
                 <div>
-                    {{ results }}
+                    {{ stringResult }}
                 </div>
+            </div>
+        </div>
+        <div class="row" >
+            <div class="col-sm-12" ng-show="searchResults">
+                <span>Results by Search Words Stem</span>
+                <div ng-repeat="item in searchResults track by $index"  >
+                    <h3>{{ item.stem }}</h3>
+                    <div ng-repeat="entry in item.lookup"  >
+                        <a target="{{ entry.title }}" href="{{ entry.entry }}">{{ entry.title }}</a>
+                    </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div> <!-- container -->
