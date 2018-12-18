@@ -10,7 +10,7 @@
 <body>
 <div ng-app="myApp"
      ng-controller="myCtrl"
-     ng-init="indexMode=True"
+     ng-init="indexMode=true; inputHint='http://'"
 >
     <div class="container">
         <h1>Inverted Indexing</h1>
@@ -18,15 +18,15 @@
         <div class="row">
             <div class="col-sm-12">
                 <button type="button"
-                        ng-click="indexMode=!indexMode"
+                        ng-click="indexMode=false;inputHint='search words'"
                         class="btn btn-default">
-                    Search Mode
+                    <span ng-class="{ 'highlighted': indexMode == false }">Search Mode</span>
                 </button>
                 |
                 <button type="button"
-                        ng-click="indexMode=!indexMode"
+                        ng-click="indexMode=true;inputHint='http://'"
                         class="btn btn-default">
-                    Index Web Site Mode
+                    <span ng-class="{ 'highlighted': indexMode == true }">Index Web Site Mode</span>
                 </button>
             </div>
         </div>
@@ -34,6 +34,7 @@
             <div class="col-sm-12">
                 <input type="text"
                        class="form-control"
+                       ng-attr-placeholder="{{inputHint}}"
                        ng-model="input"
                 ></input>
             </div>

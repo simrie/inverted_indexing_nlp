@@ -1,3 +1,4 @@
-h3 {
-    color: red
+.highlighted {
+    font-style: italic;
+    font-weight: bold
 }

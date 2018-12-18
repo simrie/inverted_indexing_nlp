@@ -32,15 +32,17 @@ app.get('/clear', function(req, res) {
     res.send(clear.doClear());
 });
 
-app.post('/index', function(req, res) {
-    const text = indexing.doIndex(req.body.urlIP);
-    text.then(result => {
-        res.json(result);
-        res.end();
-    }).catch(err => {
-        res.json(err);
-        res.end();
-    });
+app.post('/index', async function(req, res) {
+    //TODO: make this send stat message after indexing
+    try {
+        const done = await indexing.doIndex(req.body.urlIP);
+        const msg = indexing.getStatMessage(done);
+        console.log(msg);
+        msg.then(res.send).catch(res.send);
+    } catch(err) {
+        console.log('err ', err);
+        res.send(err);
+    }
 });
 
 app.post('/search', function(req, res) {

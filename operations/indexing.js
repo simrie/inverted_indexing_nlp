@@ -43,6 +43,7 @@ const reverseIndex = (crawl) => {
 
 async function crawlHrefs(crawl) {
     const crawls = [];
+    console.log('crawlHrefs ', crawl);
     if (!crawl.ahrefs) return crawls;
     const indexEntries = store.indexEntries;
     store.crawlDepth = store.crawlDepth +1;
@@ -55,7 +56,7 @@ async function crawlHrefs(crawl) {
     const indexedEntries = _.keys(indexEntries);
     _.forEach(ahrefs, ahref => {
         if (!_.includes(indexedEntries, ahref)) {
-            crawls[ahref] = doIndex(ahref);
+            crawls[ahref] = index(ahref);
         }
     })
     _.unset(crawl, 'ahrefs');
@@ -110,9 +111,8 @@ const cheerioTag = (text, tag) => {
     return elem.text();
 }
 
-async function doIndex(entry) {
+async function index(entry) {
     if (!entry) return {};
-    if (!entry.startsWith('http')) return {};
     let text;
     let title;
     let crawl;
@@ -128,17 +128,50 @@ async function doIndex(entry) {
         _.unset(crawl, 'textToTokenize');
         crawl = reverseIndex(crawl);
         crawl = indexVectors(crawl);
-        crawl.crawls = await crawlHrefs(crawl);
-        return { entry: { entry, crawl, crawls: crawl.crawls.length } };
+        return crawl;
     } catch(err) {
         console.log(err);
         return { err };
     }
+};
+
+async function reduceCrawls(crawls) {
+    return _.reduce(crawls,
+        async function reducer(result, crawl) {
+            crawl.then(value => {
+                const crawled = crawlHrefs(value);
+                crawled.then(crawl2 => {
+                    const ahrefs = _.keys(crawl2);
+                    _.forEach(ahrefs, (ahref) => {
+                        index(ahref).then(href =>
+                            crawlHrefs(href)
+                        ).catch();
+                    });
+                });
+                return crawled;
+            }).catch([]);
+        }, crawls);
+};
+
+async function doIndex(entry) {
+    const crawls = [];
+    const rootCrawl = index(entry);
+    store.crawlDepth = 0;
+    crawls.push(rootCrawl);
+    const done = await reduceCrawls(crawls);
+    return done;
+};
+
+async function getStatMessage(unimportant) {
+    const entries = _.keys(store.indexEntries).length;
+    const stems = _.keys(store.indexStems).length;
+    return `${stems} word stems indexed from ${entries} nested addresses`;
 }
 
 const indexing = (() => {
     return {
-        doIndex
+        doIndex,
+        getStatMessage
     }
 })();
 
