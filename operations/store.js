@@ -10,7 +10,7 @@
 const indexEntries = {};
 const indexStems = {};
 let crawlDepth = 0;
-const crawlDepthMax = 3;
+const crawlDepthMax = 2;
 
 const store = (() => {
     return {
