@@ -50,7 +50,7 @@ app.post('/index', function(req, res) {
         io.emit('result', msg);
     };
     // setting a likely interval for it to be done
-    setTimeout(emitResult, 8000, 'timeout');
+    //setTimeout(emitResult, 8000, 'timeout');
     // because promise is not working to send the done message
     const crawls = util.promisify(crawl);
     crawls(url).then(() => emitResult).catch(console.log);

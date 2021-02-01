@@ -47,10 +47,12 @@ async function crawlHrefs(crawl) {
     console.log('crawlHrefs ', crawl);
     if (!crawl.ahrefs) return crawls;
     const indexEntries = store.indexEntries;
+    /*
     store.crawlDepth = store.crawlDepth +1;
     if (store.crawlDepth > store.crawlDepthMax) {
         return crawls;
     }
+    */
     const ahrefs = crawl.ahrefs;
     console.log('crawlDepth ', store.crawlDepth);
     console.log('crawl Hrefs ', ahrefs.length);
@@ -136,6 +138,7 @@ async function index(entry) {
     }
 };
 
+/*
 async function reduceCrawls(crawls) {
     return _.reduce(crawls,
         async function reducer(result, crawl) {
@@ -155,13 +158,45 @@ async function reduceCrawls(crawls) {
             }).catch([]);
         }, crawls);
 };
+*/
+
+async function recursive(crawledParent, thisCrawlDepth) {
+    // Replaces reducer function
+    // recursive function that returns and array of "crawled" objects
+    // resolve crawled, pass value to crawlHrefs()
+    console.log('CRAWLDEPTH ', thisCrawlDepth);
+    console.log('crawlDepthMax ', store.crawlDepthMax);
+
+    crawledParent.then(value => {
+        if (thisCrawlDepth > store.crawlDepthMax) {
+            console.log('RETURN thisCrawlDepth > crawlDepthMax');
+            return [];
+        }
+        if (!crawledParent) {
+            console.log('RETURN !crawledParent');
+            return [];
+        }
+        const childCrawlDepth = thisCrawlDepth + 1;
+        const crawled = crawlHrefs(value);
+        const childCrawled = [];
+        crawled.then(crawl => {
+            const ahrefs = _.keys(crawl);
+            _.forEach(ahrefs, (ahref) => {
+                const childCrawl = index(ahref);
+                childCrawled.push(recursive(childCrawl, childCrawlDepth));
+            });
+            return childCrawled;
+        });
+    }).catch();
+}
 
 async function doIndex(entry) {
     const crawls = [];
     const rootCrawl = index(entry);
     store.crawlDepth = 0;
     crawls.push(rootCrawl);
-    return await reduceCrawls(crawls);
+    //return await reduceCrawls(crawls);
+    return await recursive(rootCrawl, store.crawlDepth);
 };
 
 const getStatMessage = () => {
