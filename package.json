@@ -4,7 +4,7 @@
   "description": "Index a web page as well as its linked pages.  Return page titles as links when searching for indexed words.",
   "main": "index.js",
   "dependencies": {
-    "angular": "^1.7.5",
+    "angular": "^1.8.0",
     "body-parser": "^1.18.3",
     "bootstrap": "^4.1.3",
     "cheerio": "1.0.0-rc.2",
